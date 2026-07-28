@@ -60,13 +60,31 @@ RUN dpkg --add-architecture i386 \
     && rm -f /tmp/kasmvnc.deb \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd --gid 1000 aurora \
-    && useradd \
-        --uid 1000 \
-        --gid 1000 \
-        --create-home \
-        --shell /bin/bash \
-        aurora \
+RUN if getent group aurora >/dev/null; then \
+        :; \
+    elif getent group 1000 >/dev/null; then \
+        groupmod --new-name aurora "$(getent group 1000 | cut -d: -f1)"; \
+    else \
+        groupadd --gid 1000 aurora; \
+    fi \
+    && if id -u aurora >/dev/null 2>&1; then \
+        :; \
+    elif getent passwd 1000 >/dev/null; then \
+        usermod \
+            --gid aurora \
+            --home /home/aurora \
+            --login aurora \
+            --move-home \
+            --shell /bin/bash \
+            "$(getent passwd 1000 | cut -d: -f1)"; \
+    else \
+        useradd \
+            --uid 1000 \
+            --gid aurora \
+            --create-home \
+            --shell /bin/bash \
+            aurora; \
+    fi \
     && usermod --append --groups ssl-cert aurora \
     && install -d -m 0755 -o aurora -g aurora \
         /config \
