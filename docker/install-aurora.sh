@@ -19,8 +19,7 @@ EOF
 fi
 
 install -d -m 0755 -o aurora -g aurora "${PREFIX}"
-touch "${BUILD_LOG}"
-chown aurora:aurora "${BUILD_LOG}"
+install -m 0664 -o aurora -g aurora /dev/null "${BUILD_LOG}"
 
 run_wine() {
     runuser -u aurora -- env \
@@ -30,8 +29,7 @@ run_wine() {
         WINEARCH=win32 \
         WINEDEBUG=-all \
         WINEPREFIX="${PREFIX}" \
-        bash -c 'cd /home/aurora && exec xvfb-run -a "$@"' bash "$@" \
-        >>"${BUILD_LOG}" 2>&1
+        bash -c "cd /home/aurora && exec xvfb-run -a \"\$@\" >>\"${BUILD_LOG}\" 2>&1" bash "$@"
 }
 
 run_wine wineboot --init
