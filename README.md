@@ -3,9 +3,8 @@
 Run Aurora Character Builder as a browser-accessible application using Wine,
 Openbox, and KasmVNC in one Docker image.
 
-The provided Compose configuration starts two isolated Aurora sessions. Each
-session gets its own persistent Wine prefix while both sessions access the same
-external character-data directory.
+The provided Compose configuration starts one Aurora session with a persistent
+Wine prefix and shared external character-data directory.
 
 ## What this repository does
 
@@ -18,17 +17,17 @@ external character-data directory.
 - Maps `/data/aurora` to both:
   - Wine drive `D:`
   - `C:\Users\aurora\Documents\5e Character Builder`
-- Supports independent concurrent users by running one container per user.
+- Runs a single Aurora session per deployment.
 
 ## Important licensing boundary
 
-This project contains only original container configuration and automation.
-It does **not** include Aurora, Microsoft fonts, Microsoft runtimes, a Wine
-prefix, D&D content, or character files.
+This project contains original container configuration and automation plus one
+bundled custom font (`assets/fonts/SEGUISYM.TTF`). It does **not** include
+Aurora, Microsoft runtimes, a Wine prefix, D&D content, or character files.
 
-You must obtain Aurora and any optional fonts yourself and ensure that your use
-complies with their licenses. This project is not affiliated with Aurora,
-Kasm Technologies, Microsoft, Wine, Wizards of the Coast, or Hasbro.
+You must obtain Aurora yourself and ensure that your use complies with its
+license. This project is not affiliated with Aurora, Kasm Technologies,
+Microsoft, Wine, Wizards of the Coast, or Hasbro.
 
 ## Requirements
 
@@ -49,8 +48,8 @@ changes ownership of `/data/aurora`.
    assets/Aurora Setup.msi
    ```
 
-2. Optionally add licensed Segoe fonts as described in
-   [`assets/README.md`](assets/README.md).
+2. The bundled custom font at `assets/fonts/SEGUISYM.TTF` is installed
+   automatically during image build.
 
 3. Create the environment file:
 
@@ -61,7 +60,7 @@ changes ownership of `/data/aurora`.
 4. Set `AURORA_DATA_PATH` in `.env` to the host directory that contains the
    `5e Character Builder` data.
 
-5. Build and start both sessions:
+5. Build and start the session:
 
    ```bash
    docker compose build
@@ -73,10 +72,9 @@ installers must finish without interactive prompts.
 
 ## URLs
 
-With the example environment:
+With the example environment, Aurora is available at:
 
-- Session 1: `https://HOST:8444`
-- Session 2: `https://HOST:8445`
+- `https://HOST:8444`
 
 The KasmVNC certificate is locally generated, so direct browser access produces
 a certificate warning. A reverse proxy should provide the public certificate.
@@ -99,24 +97,21 @@ KasmVNC authentication is deliberately disabled in the container. Protect the
 service with Authelia or another authentication gateway and restrict direct
 network access to the KasmVNC ports.
 
-See [`docs/reverse-proxy.md`](docs/reverse-proxy.md) for Nginx and multi-user
-routing notes.
+See [`docs/reverse-proxy.md`](docs/reverse-proxy.md) for Nginx notes.
 
 ## Logs
 
 ```bash
-docker compose logs -f aurora-user1
-docker exec aurora-user1 tail -f /config/logs/session.log
-docker exec aurora-user1 tail -f /config/logs/xvnc.log
+docker compose logs -f aurora
+docker exec aurora tail -f /config/logs/session.log
+docker exec aurora tail -f /config/logs/xvnc.log
 ```
-
-Replace `aurora-user1` with `aurora-user2` for the second session.
 
 ## Updating
 
-Back up both named `/config` volumes before rebuilding. Rebuilding the image
-does not modify existing prefixes automatically. To initialize a new prefix
-from an updated image, start it with a new empty `/config` volume.
+Back up the named `/config` volume before rebuilding. Rebuilding the image does
+not modify existing prefixes automatically. To initialize a new prefix from an
+updated image, start it with a new empty `/config` volume.
 
 ## Known limitation
 

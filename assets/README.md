@@ -1,6 +1,7 @@
 # Local build assets
 
-This directory intentionally contains no redistributable application payloads.
+This directory contains the local Aurora installer input and one bundled custom
+font used by the image build.
 
 Before building, place your legally obtained installer here:
 
@@ -10,19 +11,13 @@ assets/Aurora Setup.msi
 
 The MSI is ignored by Git and included only in your local Docker build context.
 
-## Optional Microsoft fonts
+## Bundled custom font
 
-If you are licensed to use them, place the following files under
-`assets/fonts/`:
+The repository intentionally commits one custom font file:
 
 ```text
-segoeui.ttf
-segoeuib.ttf
-segoeuil.ttf
-seguisb.ttf
-segoeuisl.ttf
-seguisym.ttf
+assets/fonts/SEGUISYM.TTF
 ```
 
-The build validates and installs supplied `.ttf` files. Font files are ignored
-by Git and must not be committed to this repository.
+The image build validates and installs this font automatically for Linux and
+Wine. No local font-copy step is required.

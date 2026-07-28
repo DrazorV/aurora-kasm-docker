@@ -1,6 +1,7 @@
 assets/*.msi
 assets/fonts/*
 !assets/fonts/README.md
+!assets/fonts/SEGUISYM.TTF
 config/
 data/
 .env

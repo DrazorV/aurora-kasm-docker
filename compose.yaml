@@ -26,28 +26,16 @@ x-aurora-common: &aurora-common
     - no-new-privileges:true
 
 services:
-  aurora-user1:
+  aurora:
     <<: *aurora-common
-    container_name: aurora-user1
+    container_name: aurora
     ports:
-      - "${AURORA_BIND_IP:-0.0.0.0}:${AURORA_USER1_PORT:-8444}:8444"
+      - "${AURORA_BIND_IP:-0.0.0.0}:${AURORA_PORT:-8444}:8444"
     volumes:
       - type: bind
         source: "${AURORA_DATA_PATH:?Set AURORA_DATA_PATH in .env}"
         target: /data/aurora
-      - aurora-user1-config:/config
-
-  aurora-user2:
-    <<: *aurora-common
-    container_name: aurora-user2
-    ports:
-      - "${AURORA_BIND_IP:-0.0.0.0}:${AURORA_USER2_PORT:-8445}:8444"
-    volumes:
-      - type: bind
-        source: "${AURORA_DATA_PATH:?Set AURORA_DATA_PATH in .env}"
-        target: /data/aurora
-      - aurora-user2-config:/config
+      - aurora-config:/config
 
 volumes:
-  aurora-user1-config:
-  aurora-user2-config:
+  aurora-config:
