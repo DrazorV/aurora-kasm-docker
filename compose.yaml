@@ -1,10 +1,5 @@
 x-aurora-common: &aurora-common
-  image: aurora-kasm:local
-  build:
-    context: .
-    args:
-      KASMVNC_VERSION: "1.4.0"
-      WINETRICKS_VERSION: "20260125"
+  image: "${AURORA_IMAGE:-ghcr.io/drazorv/aurora-kasm:latest}"
   restart: unless-stopped
   environment:
     TZ: "${TZ:-Europe/Athens}"

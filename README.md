@@ -8,10 +8,11 @@ Wine prefix and shared external character-data directory.
 
 ## What this repository does
 
+- Publishes a ready-to-use Aurora image to GHCR.
 - Builds a 32-bit Wine prefix on Ubuntu 24.04.
 - Installs `.NET Framework 4.5.2`, Visual C++ 2010, and required fonts through
   Winetricks.
-- Installs a locally supplied Aurora MSI.
+- Installs Aurora during image build.
 - Runs only Aurora inside a minimal Openbox session.
 - Streams the application through KasmVNC over HTTPS.
 - Maps `/data/aurora` to both:
@@ -21,26 +22,45 @@ Wine prefix and shared external character-data directory.
 
 ## Important licensing boundary
 
-This project contains original container configuration and automation plus one
-bundled custom font (`assets/fonts/SEGUISYM.TTF`). It does **not** include
-Aurora, Microsoft runtimes, a Wine prefix, D&D content, or character files.
+This repository contains original container configuration and automation plus
+one bundled custom font (`assets/fonts/SEGUISYM.TTF`). The repository source
+still does **not** commit Aurora installers/binaries, Microsoft runtimes, a
+Wine prefix, D&D content, or character files.
 
-You must obtain Aurora yourself and ensure that your use complies with its
-license. This project is not affiliated with Aurora, Kasm Technologies,
-Microsoft, Wine, Wizards of the Coast, or Hasbro.
+Published images may include Aurora if built from a legally obtained installer.
+You are responsible for ensuring your use complies with Aurora's license. This
+project is not affiliated with Aurora, Kasm Technologies, Microsoft, Wine,
+Wizards of the Coast, or Hasbro.
 
 ## Requirements
 
 - Docker Engine with the Compose plugin.
 - An x86-64 host.
-- At least 12 GB free while building.
-- A legally obtained `Aurora Setup.msi`.
 - A writable host directory containing your Aurora character data.
 
 The mounted data must be accessible to UID/GID `1000:1000`. The container never
 changes ownership of `/data/aurora`.
 
-## Build and run
+## Run prebuilt image (recommended)
+
+1. Create the environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Set `AURORA_DATA_PATH` in `.env` to the host directory that contains the
+   `5e Character Builder` data.
+
+3. Optionally override `AURORA_IMAGE` if you publish a different tag/owner.
+
+4. Start the session:
+
+   ```bash
+   docker compose up -d
+   ```
+
+## Build locally (optional)
 
 1. Copy the installer to:
 
@@ -63,12 +83,29 @@ changes ownership of `/data/aurora`.
 5. Build and start the session:
 
    ```bash
-   docker compose build
+   docker compose -f compose.yaml -f compose.build.yaml build
    docker compose up -d
    ```
 
 The first build can take a long time because Wine and the Microsoft runtime
 installers must finish without interactive prompts.
+
+## Publish the public image
+
+1. Add a repository secret named `AURORA_MSI_BASE64` containing a base64-encoded
+   Aurora installer:
+
+   ```bash
+   base64 -w 0 "Aurora Setup.msi"
+   ```
+
+2. Run the GitHub Actions workflow `Publish Image` (`workflow_dispatch`) and
+   choose an `image_tag` (for example `latest`).
+
+3. The workflow publishes:
+   - `ghcr.io/<owner>/aurora-kasm:<image_tag>`
+   - `ghcr.io/<owner>/aurora-kasm:sha-<shortsha>`
+   - a tag-matched image when run on a Git tag
 
 ## URLs
 
