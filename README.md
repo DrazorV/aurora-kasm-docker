@@ -65,7 +65,9 @@ settings for deployments that prefer environment-based configuration.
 - An x86-64 host.
 - A writable content directory accessible to UID/GID `1000:1000`.
 
-The container does not change ownership of `/data/aurora`.
+On first startup, the container attempts to `chown` only `/data/aurora` itself
+to `1000:1000` when needed. If your host filesystem or mount options block that
+change, set host-side ownership manually.
 
 ## Persistent data
 
@@ -126,9 +128,10 @@ installers complete.
 
 ## Licensing
 
-This repository contains original container configuration and automation plus
-one bundled custom font (`assets/fonts/SEGUISYM.TTF`). It does not commit Aurora
-installers or binaries, Microsoft runtimes, a Wine prefix, D&D content, or
+This repository contains original container configuration and automation, one
+bundled custom font (`assets/fonts/SEGUISYM.TTF`), and may include an Aurora
+installer at `assets/Aurora Setup.msi` for image builds. It does not commit an
+installed Aurora runtime, Microsoft runtimes, a Wine prefix, D&D content, or
 character files.
 
 Published images may include Aurora when built from a legally obtained

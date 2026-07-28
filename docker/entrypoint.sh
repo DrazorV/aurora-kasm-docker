@@ -7,7 +7,13 @@ readonly DATA_DIR="/data/aurora"
 readonly DOCUMENTS="${PREFIX}/drive_c/users/aurora/Documents/5e Character Builder"
 
 if [[ ! -r "${DATA_DIR}" || ! -w "${DATA_DIR}" ]]; then
+    echo "Adjusting /data/aurora ownership to UID/GID 1000 for first-run setup..."
+    chown 1000:1000 "${DATA_DIR}" 2>/dev/null || true
+fi
+
+if [[ ! -r "${DATA_DIR}" || ! -w "${DATA_DIR}" ]]; then
     echo "ERROR: /data/aurora must be readable and writable by UID/GID 1000." >&2
+    echo "Set ownership on the host (for example: chown 1000:1000 <path>) and restart." >&2
     exit 1
 fi
 
