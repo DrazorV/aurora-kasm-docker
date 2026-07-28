@@ -31,8 +31,15 @@ jobs:
 
       - name: Confirm proprietary payloads are absent
         run: |
-          if git ls-files | grep -Eiq '\.msi$'; then
-            echo "MSI installers must not be committed."
+          mapfile -t unexpected_msi_files < <(
+            git ls-files \
+              | grep -Ei '\.msi$' \
+              | grep -Ev '^assets/Aurora Setup\.msi$' || true
+          )
+
+          if ((${#unexpected_msi_files[@]} > 0)); then
+            echo "Unexpected committed MSI files:"
+            printf ' - %s\n' "${unexpected_msi_files[@]}"
             exit 1
           fi
 

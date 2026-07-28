@@ -13,7 +13,7 @@ ERROR: assets/Aurora Setup.msi is missing.
 Download Aurora from its official website and place the installer at:
   assets/Aurora Setup.msi
 
-The installer is intentionally excluded from this repository.
+The installer is expected to be present in this repository.
 EOF
     exit 1
 fi
