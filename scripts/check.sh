@@ -30,8 +30,15 @@ else
     echo "docker is not installed; Compose validation skipped."
 fi
 
-if git ls-files | grep -Eiq '\.msi$'; then
-    echo "ERROR: MSI installers must not be committed." >&2
+mapfile -t unexpected_msi_files < <(
+    git ls-files \
+        | grep -Ei '\.msi$' \
+        | grep -Ev '^assets/Aurora Setup\.msi$' || true
+)
+
+if ((${#unexpected_msi_files[@]} > 0)); then
+    echo "ERROR: Unexpected committed MSI files:" >&2
+    printf ' - %s\n' "${unexpected_msi_files[@]}" >&2
     exit 1
 fi
 

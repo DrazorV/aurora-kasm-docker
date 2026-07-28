@@ -9,8 +9,8 @@ The installer is expected at:
 assets/Aurora Setup.msi
 ```
 
-The default prebuilt image flow does not require using this local installer
-path.
+The image publish workflow expects this installer file to be present in the
+repository at that path.
 
 ## Bundled custom font
 
