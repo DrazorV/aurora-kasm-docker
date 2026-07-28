@@ -14,6 +14,8 @@ ENV LANG=C.UTF-8 \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Package versions follow the supported Ubuntu 24.04 repositories at build time.
+# hadolint ignore=DL3008
 RUN dpkg --add-architecture i386 \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -48,6 +50,8 @@ RUN dpkg --add-architecture i386 \
     && curl -fsSL \
         -o /tmp/kasmvnc.deb \
         "https://github.com/kasmtech/KasmVNC/releases/download/v${KASMVNC_VERSION}/kasmvncserver_noble_${KASMVNC_VERSION}_${KASM_ARCH}.deb" \
+    # KasmVNC dependencies are resolved by APT from the same Ubuntu repositories.
+    # hadolint ignore=DL3008
     && apt-get install -y --no-install-recommends /tmp/kasmvnc.deb \
     && curl -fsSL \
         -o /usr/local/bin/winetricks \
