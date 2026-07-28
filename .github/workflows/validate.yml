@@ -1,0 +1,37 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Validate Compose
+        env:
+          AURORA_DATA_PATH: /tmp/aurora-data
+        run: docker compose config --quiet
+
+      - name: Confirm proprietary payloads are absent
+        run: |
+          if find assets -type f \( -iname '*.msi' -o -iname '*.ttf' -o -iname '*.otf' \) | grep -q .; then
+            echo "Proprietary build assets must not be committed."
+            exit 1
+          fi

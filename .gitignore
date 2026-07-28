@@ -1,0 +1,9 @@
+assets/*.msi
+assets/fonts/*
+!assets/fonts/README.md
+config/
+data/
+.env
+*.log
+*.tar
+*.tar.gz

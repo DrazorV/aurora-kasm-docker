@@ -1,0 +1,53 @@
+x-aurora-common: &aurora-common
+  image: aurora-kasm:local
+  build:
+    context: .
+    args:
+      KASMVNC_VERSION: "1.4.0"
+      WINETRICKS_VERSION: "20260125"
+  restart: unless-stopped
+  environment:
+    TZ: "${TZ:-Europe/Athens}"
+    FREETYPE_PROPERTIES: "truetype:interpreter-version=35"
+  volumes:
+    - type: bind
+      source: "${AURORA_DATA_PATH:?Set AURORA_DATA_PATH in .env}"
+      target: /data/aurora
+  shm_size: "1gb"
+  cap_drop:
+    - ALL
+  cap_add:
+    - CHOWN
+    - DAC_OVERRIDE
+    - FOWNER
+    - SETGID
+    - SETUID
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  aurora-user1:
+    <<: *aurora-common
+    container_name: aurora-user1
+    ports:
+      - "${AURORA_BIND_IP:-0.0.0.0}:${AURORA_USER1_PORT:-8444}:8444"
+    volumes:
+      - type: bind
+        source: "${AURORA_DATA_PATH:?Set AURORA_DATA_PATH in .env}"
+        target: /data/aurora
+      - aurora-user1-config:/config
+
+  aurora-user2:
+    <<: *aurora-common
+    container_name: aurora-user2
+    ports:
+      - "${AURORA_BIND_IP:-0.0.0.0}:${AURORA_USER2_PORT:-8445}:8444"
+    volumes:
+      - type: bind
+        source: "${AURORA_DATA_PATH:?Set AURORA_DATA_PATH in .env}"
+        target: /data/aurora
+      - aurora-user2-config:/config
+
+volumes:
+  aurora-user1-config:
+  aurora-user2-config:
