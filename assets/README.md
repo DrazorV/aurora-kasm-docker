@@ -9,8 +9,8 @@ The installer is expected at:
 assets/Aurora Setup.msi
 ```
 
-The image publish workflow expects this installer file to be present in the
-repository at that path.
+The image publish workflow creates this file from the `AURORA_MSI_BASE64`
+repository secret before building the image.
 
 ## Bundled custom font
 
