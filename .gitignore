@@ -1,4 +1,5 @@
 assets/*.msi
+!assets/Aurora Setup.msi
 assets/fonts/*
 !assets/fonts/README.md
 !assets/fonts/SEGUISYM.TTF
