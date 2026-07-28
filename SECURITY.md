@@ -12,8 +12,9 @@ report contains exploitable details.
 ## Deployment warning
 
 KasmVNC authentication is disabled inside the container. Deploy it only behind
-an authenticated reverse proxy and restrict ports 8444/8445 so they are not
+an authenticated reverse proxy and restrict port 8444 so it is not
 reachable directly from untrusted networks.
 
-Never commit MSI installers, fonts, Wine prefixes, character data, credentials,
+Never commit MSI installers, unapproved font payloads beyond
+`assets/fonts/SEGUISYM.TTF`, Wine prefixes, character data, credentials,
 certificates, cookies, or reverse-proxy secrets.

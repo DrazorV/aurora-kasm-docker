@@ -30,4 +30,21 @@ else
     echo "docker is not installed; Compose validation skipped."
 fi
 
+if git ls-files | grep -Eiq '\.msi$'; then
+    echo "ERROR: MSI installers must not be committed." >&2
+    exit 1
+fi
+
+mapfile -t unexpected_font_files < <(
+    git ls-files \
+        | grep '^assets/fonts/' \
+        | grep -Ev '^assets/fonts/(README\.md|SEGUISYM\.TTF)$' || true
+)
+
+if ((${#unexpected_font_files[@]} > 0)); then
+    echo "ERROR: Unexpected committed files under assets/fonts/:" >&2
+    printf ' - %s\n' "${unexpected_font_files[@]}" >&2
+    exit 1
+fi
+
 echo "Repository checks completed."

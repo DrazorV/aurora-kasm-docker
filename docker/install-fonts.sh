@@ -24,10 +24,11 @@ install -d -m 0755 -o aurora -g aurora "${WINE_FONT_DIR}"
 
 installed=0
 
-for font_path in "${SOURCE_DIR}"/*.ttf; do
+for font_path in "${SOURCE_DIR}"/*.[Tt][Tt][Ff]; do
     [[ -e "${font_path}" ]] || continue
 
     font_file="$(basename "${font_path}")"
+    font_key="${font_file,,}"
 
     if ! fc-scan "${font_path}" >/dev/null 2>&1; then
         echo "ERROR: Invalid font file: ${font_path}" >&2
@@ -38,7 +39,7 @@ for font_path in "${SOURCE_DIR}"/*.ttf; do
     install -m 0644 -o aurora -g aurora \
         "${font_path}" "${WINE_FONT_DIR}/${font_file}"
 
-    font_name="${FONT_NAMES[${font_file}]:-}"
+    font_name="${FONT_NAMES[${font_key}]:-}"
 
     if [[ -n "${font_name}" ]]; then
         runuser -u aurora -- env \

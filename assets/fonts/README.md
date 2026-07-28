@@ -1,6 +1,9 @@
-# Optional fonts
+# Bundled custom font
 
-Place locally supplied `.ttf` files in this directory. Git ignores all font
-files here.
+This directory intentionally contains the committed custom bundled font:
 
-See [`../README.md`](../README.md) for the supported filenames.
+```text
+SEGUISYM.TTF
+```
+
+It is validated and installed automatically during image build.

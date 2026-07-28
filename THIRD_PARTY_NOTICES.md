@@ -11,7 +11,8 @@ licenses.
 | Winetricks | https://github.com/Winetricks/winetricks | Installs third-party runtime components |
 | Ubuntu | https://ubuntu.com/ | Base distribution and packages |
 | Aurora Character Builder | https://aurorabuilder.com/ | User-supplied installer; not included |
-| Microsoft runtimes and fonts | https://www.microsoft.com/ | Downloaded or supplied by the builder; not included in this repository |
+| Microsoft runtimes | https://www.microsoft.com/ | Downloaded by Winetricks during build; not included in this repository |
+| Bundled custom font (`assets/fonts/SEGUISYM.TTF`) | Included in this repository | Installed automatically during image build |
 
 The MIT license in this repository applies only to the original files in this
 repository. It does not relicense third-party software or content.

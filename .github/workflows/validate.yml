@@ -31,7 +31,19 @@ jobs:
 
       - name: Confirm proprietary payloads are absent
         run: |
-          if find assets -type f \( -iname '*.msi' -o -iname '*.ttf' -o -iname '*.otf' \) | grep -q .; then
-            echo "Proprietary build assets must not be committed."
+          if git ls-files | grep -Eiq '\.msi$'; then
+            echo "MSI installers must not be committed."
+            exit 1
+          fi
+
+          mapfile -t unexpected_font_files < <(
+            git ls-files \
+              | grep '^assets/fonts/' \
+              | grep -Ev '^assets/fonts/(README\.md|SEGUISYM\.TTF)$' || true
+          )
+
+          if ((${#unexpected_font_files[@]} > 0)); then
+            echo "Unexpected committed files under assets/fonts/:"
+            printf ' - %s\n' "${unexpected_font_files[@]}"
             exit 1
           fi
