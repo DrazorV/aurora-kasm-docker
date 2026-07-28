@@ -62,7 +62,7 @@ changes ownership of `/data/aurora`.
 
 ## Build locally (optional)
 
-1. Copy the installer to:
+1. The installer is expected at:
 
    ```text
    assets/Aurora Setup.msi
