@@ -1,145 +1,83 @@
 # Aurora Kasm Docker
 
-Run Aurora Character Builder as a browser-accessible application using Wine,
-Openbox, and KasmVNC in one Docker image.
+Run Aurora Character Builder in a browser with Wine, Openbox, and KasmVNC.
+The published image already contains Aurora and its required Wine runtime, so
+running it only requires Docker and a folder for your Aurora content.
 
-The provided Compose configuration starts one Aurora session with a persistent
-Wine prefix and shared external character-data directory.
+## Quick start
 
-## What this repository does
+Create a `compose.yaml` file with the following contents. The `./content`
+directory is the only host folder you need to provide; Docker creates it if it
+does not already exist.
 
-- Publishes a ready-to-use Aurora image to GHCR.
-- Builds a 32-bit Wine prefix on Ubuntu 24.04.
-- Installs `.NET Framework 4.5.2`, Visual C++ 2010, and required fonts through
-  Winetricks.
-- Installs Aurora during image build.
-- Runs only Aurora inside a minimal Openbox session.
-- Streams the application through KasmVNC over HTTPS.
-- Maps `/data/aurora` to both:
-  - Wine drive `D:`
-  - `C:\Users\aurora\Documents\5e Character Builder`
-- Runs a single Aurora session per deployment.
+````yaml
+services:
+  aurora:
+    image: ghcr.io/drazorv/aurora-kasm:latest
+    container_name: aurora
+    restart: unless-stopped
+    ports:
+      - "8444:8444"
+    volumes:
+      - ./content:/data/aurora
+      - aurora-config:/config
 
-## Important licensing boundary
+volumes:
+  aurora-config:
+````
 
-This repository contains original container configuration and automation plus
-one bundled custom font (`assets/fonts/SEGUISYM.TTF`). The repository source
-still does **not** commit a
-Wine prefix, D&D content, or character files.
+Start Aurora:
 
-Published images may include Aurora if built from a legally obtained installer.
-You are responsible for ensuring your use complies with Aurora's license. This
-project is not affiliated with Aurora, Kasm Technologies, Microsoft, Wine,
-Wizards of the Coast, or Hasbro.
+```bash
+docker compose up -d
+```
+
+Open `https://HOST:8444` in a browser. The KasmVNC certificate is generated
+locally, so the first direct connection will show a certificate warning.
+
+Place your `5e Character Builder` content in `./content`. Inside the container,
+that folder is available both as Wine drive `D:` and at
+`C:\Users\aurora\Documents\5e Character Builder`.
+
+## Customize the deployment (optional)
+
+The minimal Compose file is enough for the default image and port. Customize it
+only when needed:
+
+- Use a different image tag or registry by changing `image`.
+- Change the public port by replacing the left side of `8444:8444`.
+- Bind the port only to localhost for use behind a reverse proxy:
+
+  ```yaml
+  ports:
+    - "127.0.0.1:8444:8444"
+  ```
+
+- Replace `./content` with an absolute path when your content lives elsewhere.
+- Set `TZ` under `environment` if you need a specific timezone.
+
+The repository's `.env.example` and `compose.yaml` provide the same kinds of
+settings for deployments that prefer environment-based configuration.
 
 ## Requirements
 
 - Docker Engine with the Compose plugin.
 - An x86-64 host.
-- A writable host directory containing your Aurora character data.
+- A writable content directory accessible to UID/GID `1000:1000`.
 
-The mounted data must be accessible to UID/GID `1000:1000`. The container never
-changes ownership of `/data/aurora`.
+The container does not change ownership of `/data/aurora`.
 
-## Run prebuilt image (recommended)
+## Persistent data
 
-1. Create the environment file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Set `AURORA_DATA_PATH` in `.env` to the host directory that contains the
-   `5e Character Builder` data.
-
-3. Optionally override `AURORA_IMAGE` if you publish a different tag/owner.
-
-4. Start the session:
-
-   ```bash
-   docker compose up -d
-   ```
-
-## Build locally (optional)
-
-1. The installer is expected at:
-
-   ```text
-   assets/Aurora Setup.msi
-   ```
-
-2. The bundled custom font at `assets/fonts/SEGUISYM.TTF` is installed
-   automatically during image build.
-
-3. Create the environment file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Set `AURORA_DATA_PATH` in `.env` to the host directory that contains the
-   `5e Character Builder` data.
-
-5. Build and start the session:
-
-   ```bash
-   docker compose -f compose.yaml -f compose.build.yaml build
-   docker compose up -d
-   ```
-
-The first build can take a long time because Wine and the Microsoft runtime
-installers must finish without interactive prompts.
-
-## Publish the public image
-
-1. Add a repository secret named `AURORA_MSI_BASE64` containing a base64-encoded
-   Aurora installer:
-
-   ```bash
-   base64 -w 0 "Aurora Setup.msi"
-   ```
-
-2. Publishing is automatic on:
-   - pushes to `main` (publishes `latest` and `sha-<shortsha>`)
-   - pushed tags matching `v*` (publishes the tag plus `sha-<shortsha>`)
-
-3. Optionally run `Publish Image` manually (`workflow_dispatch`) to publish an
-   extra custom tag via `image_tag` (for example `latest` or `stable`).
-
-4. The workflow publishes:
-   - `ghcr.io/<owner>/aurora-kasm:latest` (on `main`)
-   - `ghcr.io/<owner>/aurora-kasm:<image_tag>` (manual dispatch)
-   - `ghcr.io/<owner>/aurora-kasm:sha-<shortsha>`
-   - `ghcr.io/<owner>/aurora-kasm:<git-tag>` (on `v*` tags)
-
-## URLs
-
-With the example environment, Aurora is available at:
-
-- `https://HOST:8444`
-
-The KasmVNC certificate is locally generated, so direct browser access produces
-a certificate warning. A reverse proxy should provide the public certificate.
-
-## Persistent layout
-
-| Container path | Purpose |
+| Path | Purpose |
 |---|---|
-| `/config/wineprefix` | Per-user Wine installation and preferences |
-| `/config/logs/xvnc.log` | KasmVNC log |
-| `/config/logs/session.log` | Openbox, Wine, and Aurora output |
-| `/data/aurora` | Shared character data supplied by the host |
+| `./content` | Your Aurora character data on the host |
+| `aurora-config` | Wine prefix, Aurora preferences, and container logs |
+| `/config/logs/xvnc.log` | KasmVNC log inside the container |
+| `/config/logs/session.log` | Openbox, Wine, and Aurora output inside the container |
 
-Do not share `/config` between users. Sharing `/data/aurora` is supported, but
-do not edit the same character file concurrently.
-
-## Reverse proxy
-
-KasmVNC authentication is deliberately disabled in the container. Protect the
-service with Authelia or another authentication gateway and restrict direct
-network access to the KasmVNC ports.
-
-See [`docs/reverse-proxy.md`](docs/reverse-proxy.md) for Nginx notes.
+Keep `aurora-config` separate for each user. Sharing the content directory is
+supported, but avoid editing the same character file concurrently.
 
 ## Logs
 
@@ -151,12 +89,55 @@ docker exec aurora tail -f /config/logs/xvnc.log
 
 ## Updating
 
-Back up the named `/config` volume before rebuilding. Rebuilding the image does
-not modify existing prefixes automatically. To initialize a new prefix from an
-updated image, start it with a new empty `/config` volume.
+Pull and restart to use the latest published image:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Back up the `aurora-config` volume before recreating the deployment. To start
+with a new Wine prefix after an image update, remove or replace that volume.
+
+## Reverse proxy and security
+
+KasmVNC authentication is disabled in the container. Put the service behind
+Authelia or another authentication gateway, and do not expose the KasmVNC port
+directly to untrusted networks. See [`docs/reverse-proxy.md`](docs/reverse-proxy.md)
+for Nginx notes.
+
+## Building the image locally
+
+Local builds are optional and are only needed when you want to build Aurora
+from your own legally obtained installer. Place it at:
+
+```text
+assets/Aurora Setup.msi
+```
+
+Then build with:
+
+```bash
+docker compose -f compose.yaml -f compose.build.yaml build
+```
+
+The first build can take a long time while Wine and the Microsoft runtime
+installers complete.
+
+## Licensing
+
+This repository contains original container configuration and automation plus
+one bundled custom font (`assets/fonts/SEGUISYM.TTF`). It does not commit Aurora
+installers or binaries, Microsoft runtimes, a Wine prefix, D&D content, or
+character files.
+
+Published images may include Aurora when built from a legally obtained
+installer. You are responsible for ensuring your use complies with Aurora's
+license. This project is not affiliated with Aurora, Kasm Technologies,
+Microsoft, Wine, Wizards of the Coast, or Hasbro.
 
 ## Known limitation
 
 Aurora is a Windows WPF application running through Wine. Small font-metric or
-control-alignment differences may remain compared with native Windows even
-when the correct fonts and 96-DPI configuration are used.
+control-alignment differences may remain compared with native Windows, even
+with the correct fonts and 96-DPI configuration.
