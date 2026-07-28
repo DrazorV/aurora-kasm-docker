@@ -1,0 +1,8 @@
+services:
+  aurora:
+    image: aurora-kasm:local
+    build:
+      context: .
+      args:
+        KASMVNC_VERSION: "1.4.0"
+        WINETRICKS_VERSION: "20260125"
