@@ -32,8 +32,14 @@ jobs:
         env:
           AURORA_MSI_BASE64: ${{ secrets.AURORA_MSI_BASE64 }}
         run: |
+          if [[ -r "assets/Aurora Setup.msi" ]]; then
+            echo "Using repository installer at assets/Aurora Setup.msi"
+            exit 0
+          fi
+
           if [[ -z "${AURORA_MSI_BASE64}" ]]; then
-            echo "AURORA_MSI_BASE64 secret is not set." >&2
+            echo "Aurora installer is missing and AURORA_MSI_BASE64 is not set." >&2
+            echo "Provide assets/Aurora Setup.msi in the repository or set AURORA_MSI_BASE64." >&2
             exit 1
           fi
 
