@@ -24,7 +24,7 @@ Wine prefix and shared external character-data directory.
 
 This repository contains original container configuration and automation plus
 one bundled custom font (`assets/fonts/SEGUISYM.TTF`). The repository source
-still does **not** commit Aurora installers/binaries, Microsoft runtimes, a
+still does **not** commit a
 Wine prefix, D&D content, or character files.
 
 Published images may include Aurora if built from a legally obtained installer.
