@@ -28,6 +28,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Materialize Aurora installer
+        env:
+          AURORA_MSI_BASE64: ${{ secrets.AURORA_MSI_BASE64 }}
+        run: |
+          if [[ -z "${AURORA_MSI_BASE64:-}" ]]; then
+            echo "AURORA_MSI_BASE64 secret is required to publish the image." >&2
+            exit 1
+          fi
+
+          printf '%s' "${AURORA_MSI_BASE64}" | base64 --decode > "assets/Aurora Setup.msi"
+
       - name: Compute image name
         id: image
         run: |
