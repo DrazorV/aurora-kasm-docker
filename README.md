@@ -99,13 +99,18 @@ installers must finish without interactive prompts.
    base64 -w 0 "Aurora Setup.msi"
    ```
 
-2. Run the GitHub Actions workflow `Publish Image` (`workflow_dispatch`) and
-   choose an `image_tag` (for example `latest`).
+2. Publishing is automatic on:
+   - pushes to `main` (publishes `latest` and `sha-<shortsha>`)
+   - pushed tags matching `v*` (publishes the tag plus `sha-<shortsha>`)
 
-3. The workflow publishes:
-   - `ghcr.io/<owner>/aurora-kasm:<image_tag>`
+3. Optionally run `Publish Image` manually (`workflow_dispatch`) to publish an
+   extra custom tag via `image_tag` (for example `latest` or `stable`).
+
+4. The workflow publishes:
+   - `ghcr.io/<owner>/aurora-kasm:latest` (on `main`)
+   - `ghcr.io/<owner>/aurora-kasm:<image_tag>` (manual dispatch)
    - `ghcr.io/<owner>/aurora-kasm:sha-<shortsha>`
-   - a tag-matched image when run on a Git tag
+   - `ghcr.io/<owner>/aurora-kasm:<git-tag>` (on `v*` tags)
 
 ## URLs
 
